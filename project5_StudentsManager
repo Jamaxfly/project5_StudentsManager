@@ -1,0 +1,165 @@
+/*******************************
+** 文件名: project5_StudentsManager
+** 创建人: 翟子轩
+** 日 期: 2019.10.12
+** 修改人: NULL
+** 日 期: NULL
+** 描 述: 实验五 学生成绩管理系统
+** ** 版 本: V1.0
+**-----------------------------------------------------------------------------
+********************************/
+#include <stdio.h>
+#include <stdlib.h>
+int Start(int id[]);
+void InputRecord(int id[],int score[],int student);
+int Total(int score[],int student);
+double Average(int score[],int student);
+void DataSort(int id[],int score[],int student,int (*compare)(int a,int b));
+void StatisticAnalysis(int id[],int score[],int student);
+int Ascending(int a,int b);
+int Descending(int a,int b);
+int main()
+{
+    int choice,id[30]={0},score[30]={0},student,idd;
+    /**各变量：
+    *choice：用户选择的选项，用于switch的选择。
+    *id[30]：存储了所有学生的学号（ID）
+    *score[30]：存储了所有学生的分数。
+    *student：学生人数。
+    *idd：用于case 6中记录用户选择的学号。
+    */
+    while(1){
+        choice=Start(id);
+        switch(choice){
+            case 1:printf("How many students are there?\n");
+                scanf("%d",&student);//具体人数由键盘输入
+                InputRecord(id,score,student);
+                break;
+            case 2:printf("total=%d\n",Total(score,student));
+            double m=Average(score,student);
+                printf("average=%f\n",m);
+                break;
+            case 3:DataSort(id,score,student,Descending);
+                for(int i=0;i<student;i++){
+                    //逆序输出排好序的数据，即从高到低按分数输出
+                    printf("id:%d\tscore:%d\n",id[i],score[i]);
+                }
+                break;
+            case 4:DataSort(id,score,student,Ascending);
+                for(int i=0;i<student;i++){
+                    //正序输出排好序的数据，即从低到高按分数输出
+                    printf("id:%d\tscore:%d\n",id[i],score[i]);
+                }
+                break;
+            case 5:DataSort(score,id,student,Ascending);
+                //对学号由小到大排序
+                for(int i=0;i<student;i++){
+                        //正序输出
+                    printf("id:%d\tscore:%d\n",id[i],score[i]);
+                }
+                break;
+            case 6:printf("Input ID:");
+                scanf("%d",&idd);
+                int flag=0;
+                for(int i=0;i<30;i++){
+                    if(id[i]==idd){
+                        printf("The student's score is %d",score[i]);
+                        flag=1;
+                    }
+                }
+                if(flag==0){
+                    printf("The ID id wrong!");
+                }
+                break;
+            case 7:StatisticAnalysis(id,score,student);
+                   break;
+            case 8:for(int i=0;i<student;i++){
+                    printf("id:%d\tscore:%d\n",id[i],score[i]);
+                }
+                printf("total=%d\n",Total(score,student));
+                printf("average=%lf\n",Average(score,student));
+                break;
+            case 0:exit(0);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+int Start(int id[]){//输出启动界面并读取用户选项
+    int choice,ret;
+    printf("1.Input record\n2. Calculate total and average score of course\n3. Sort in descending order by score\n4. Sort in ascending order by score\n5. Sort in ascending order by number\n6.Search by number\n7.Statistic analysis\n8.List record\n0.Exit\nPlease enter your choice: ");
+    //启动界面
+    ret=scanf("%d",&choice);
+    while((choice<0)||(choice>8)||(ret!=1)||((choice!=0)&&(choice!=1)&&(id[0]==0))){
+    //排除非法数据
+        printf("Input order value or format error!Please input again.\n");
+        fflush(stdin);        //防范非法字符，清空缓存区。
+        ret=scanf("%d",&choice);
+    }
+    return choice;
+}
+void InputRecord(int id[],int score[],int student){//用户输入1时，读取学生成绩和对应学号（ID）
+    int i;
+    for(i=0;i<student;i++){
+        printf("The ID of the student is ");//学号（ID）
+        scanf("%d",&id[i]);
+        printf("The score of the student is ");//成绩
+        scanf("%d",&score[i]);
+    }
+}
+int Total(int score[],int student){//遍历成绩数组并求和
+    int i,sum=0;
+    for(i=0;i<student;i++){
+        sum=sum+score[i];
+    }
+    return sum;
+}
+double Average(int score[],int student){//调用求和函数并返回平均值
+    double aver=Total(score,student)/(student*1.0);
+    return aver;
+}
+void DataSort(int id[],int score[],int student,int (*compare)(int a,int b)){//采用冒泡排序，用于参数中score[]数组进行从小到大的排序。
+    int t,change=0;
+    for(int i=0;i<student;i++){
+        change=0;
+        for(int j=0;j<student;j++){
+            if((*compare)(score[j],score[j+1])&&(score[j+1]!=0)){
+                //同时交换分数和学号，成绩和学号的关系由数组下标确定（一一对应）
+                t=score[j];
+                score[j]=score[j+1];
+                score[j+1]=t;
+                t=id[j];
+                id[j]=id[j+1];
+                id[j+1]=t;
+                change=1;
+            }
+        }
+        if(change==0){
+            //当一次内循环后没有交换发生，即排好序了，退出外循环。
+            break;
+        }
+    }
+}
+void StatisticAnalysis(int id[],int score[],int student){//统计各分数段学生数
+    int ex=0,good=0,mid=0,well=0,low=0;
+    //分别对应优秀（90—100 分）、良好（80—89 分）、中等（70—79 分）、及格（60 一 69 分）、不及格(0—59 分）
+    for(int i=0;i<student;i++){
+        //遍历并统计各分数段人数。
+        if(score[i]>=90) ex++;
+        else if((score[i]>=80)&&(score[i]<=89)) good++;
+        else if((score[i]>=70)&&(score[i]<=79)) mid++;
+        else if((score[i]>=60)&&(score[i]<=69)) well++;
+        else if((score[i]>=0)&&(score[i]<=59)) low++;
+    }
+    printf("Excellent:%d,rate=%f\n",ex,ex/(student*1.0));
+    printf("Good:%d,rate=%f\n",good,good/(student*1.0));
+    printf("Middle:%d,rate=%f\n",mid,mid/(student*1.0));
+    printf("Well:%d,rate=%f\n",well,well/(student*1.0));
+    printf("Low:%d,rate=%f\n",low,low/(student*1.0));
+}
+int Ascending(int a,int b){
+    return a>b;
+}
+int Descending(int a,int b){
+    return a<b;
+}
